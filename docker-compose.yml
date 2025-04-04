@@ -26,5 +26,5 @@ services:
       - NEXT_PUBLIC_PUSHER_CLUSTER=eu
       - NEXT_PUBLIC_SENTRY_DSN=https://mock-sentry-dsn@o123456.ingest.sentry.io/123456
       - NEXT_PUBLIC_LOGROCKET_APP_ID=restaurant-notebook/dev
-    command: sh -c "npm install && npx prisma generate && npx prisma migrate reset --force && npm run dev"
+    command: sh -c "npm install && npx prisma generate && npx prisma migrate deploy && npx prisma db seed && npm run dev"
     restart: unless-stopped
