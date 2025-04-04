@@ -67,14 +67,57 @@ Restaurant Notebook is a full-stack web application that allows users to track r
    npm run dev
    ```
 
-7. Open [http://localhost:53243](http://localhost:53243) in your browser.
+7. Open [http://localhost:59243](http://localhost:59243) in your browser.
 
 ### Using Docker
 
 You can also use Docker for development:
 
 ```bash
-docker-compose up
+# Build and start the Docker container
+docker-compose up --build
+
+# Run in detached mode
+docker-compose up -d
+
+# View logs when running in detached mode
+docker-compose logs -f
+
+# Stop the container
+docker-compose down
+```
+
+The application will be available at [http://localhost:59243](http://localhost:59243).
+
+#### Docker Commands for Development
+
+```bash
+# Run database migrations
+docker-compose exec app npx prisma migrate dev
+
+# Generate Prisma client
+docker-compose exec app npx prisma generate
+
+# Seed the database
+docker-compose exec app npm run seed
+
+# Run tests
+docker-compose exec app npm run test
+
+# Run end-to-end tests
+docker-compose exec app npm run test:e2e
+```
+
+#### Production Docker
+
+For production deployment:
+
+```bash
+# Build the production image
+docker build -t restaurant-notebook:prod .
+
+# Run the production container
+docker run -p 3000:3000 -e DATABASE_URL=your_production_db_url restaurant-notebook:prod
 ```
 
 ## Testing
@@ -97,13 +140,6 @@ npm run test:e2e
 
 ```bash
 npm run build
-```
-
-### Using Docker for Production
-
-```bash
-docker build -t restaurant-notebook .
-docker run -p 3000:3000 restaurant-notebook
 ```
 
 ## Project Structure
