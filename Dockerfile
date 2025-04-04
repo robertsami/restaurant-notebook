@@ -4,13 +4,11 @@ FROM node:20-alpine AS base
 FROM base AS deps
 WORKDIR /app
 
-# Install dependencies required for bcrypt
-RUN apk add --no-cache make gcc g++ python3 git sed
+# Install dependencies required for building packages
+RUN apk add --no-cache make gcc g++ python3 git
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm uninstall bcrypt
-RUN npm install bcryptjs
 RUN npm ci
 
 # Rebuild the source code only when needed
@@ -19,10 +17,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Update auth files to use bcryptjs instead of bcrypt
+# Install necessary tools for the build
 RUN apk add --no-cache sed
-RUN find /app -type f -name "*.ts" -exec sed -i 's/from "bcrypt"/from "bcryptjs"/g' {} \;
-RUN find /app -type f -name "*.ts" -exec sed -i "s/from 'bcrypt'/from 'bcryptjs'/g" {} \;
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry

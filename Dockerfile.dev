@@ -2,20 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies required for bcrypt
+# Install dependencies required for building packages
 RUN apk add --no-cache make gcc g++ python3 git
 
 COPY package*.json ./
 
-# Remove bcrypt from package.json and use bcryptjs instead
-RUN npm uninstall bcrypt
-RUN npm install bcryptjs
+# Install dependencies
+RUN npm install
 
 COPY . .
-
-# Update auth files to use bcryptjs instead of bcrypt
-RUN find /app -type f -name "*.ts" -exec sed -i 's/from "bcrypt"/from "bcryptjs"/g' {} \;
-RUN find /app -type f -name "*.ts" -exec sed -i "s/from 'bcrypt'/from 'bcryptjs'/g" {} \;
 
 RUN npx prisma generate
 
