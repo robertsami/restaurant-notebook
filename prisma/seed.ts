@@ -102,6 +102,7 @@ async function main() {
 
   const createdRestaurants = [];
   for (const restaurant of restaurants) {
+    // Create the restaurant with tagsJson
     const created = await prisma.restaurant.upsert({
       where: { 
         id: restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, '-')
@@ -111,10 +112,29 @@ async function main() {
         id: restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
         name: restaurant.name,
         location: restaurant.location,
-        tags: restaurant.tags,
+        tagsJson: JSON.stringify(restaurant.tags),
         createdBy: restaurant.createdBy
       },
     });
+    
+    // Create the tags
+    for (const tag of restaurant.tags) {
+      await prisma.restaurantTag.upsert({
+        where: {
+          restaurantId_name: {
+            restaurantId: created.id,
+            name: tag
+          }
+        },
+        update: {},
+        create: {
+          name: tag,
+          restaurantId: created.id,
+          isAiGenerated: false
+        }
+      });
+    }
+    
     createdRestaurants.push(created);
   }
 
@@ -190,7 +210,7 @@ async function main() {
       content: 'Best deep dish pizza in Chicago! The butter crust is amazing. I loved the cheese pull and the chunky tomato sauce. The atmosphere was cozy and the service was friendly. Will definitely be back next time I\'m in Chicago.',
       isPublic: true,
       visitDate: new Date('2023-10-15'),
-      photos: [],
+      photosJson: JSON.stringify([]),
     },
     {
       userId: alice.id,
@@ -199,7 +219,7 @@ async function main() {
       content: 'Mind-blowing experience. The edible balloon was so fun! Every course was like a work of art. The service was impeccable and the wine pairings were perfect. Expensive but worth it for a special occasion.',
       isPublic: true,
       visitDate: new Date('2023-11-20'),
-      photos: [],
+      photosJson: JSON.stringify([]),
     },
     {
       userId: bob.id,
@@ -208,7 +228,7 @@ async function main() {
       content: 'Animal style is the way to go. Great fast food burger. The fries were a bit underwhelming but the burger was juicy and delicious. Love the secret menu options and the price can\'t be beat.',
       isPublic: true,
       visitDate: new Date('2023-09-05'),
-      photos: [],
+      photosJson: JSON.stringify([]),
     },
     {
       userId: bob.id,
@@ -217,7 +237,7 @@ async function main() {
       content: 'The food was good but not worth the hype or the price. The black cod with miso was the standout dish. Service was a bit pretentious and the atmosphere felt more about being seen than about the food.',
       isPublic: false,
       visitDate: new Date('2023-12-01'),
-      photos: [],
+      photosJson: JSON.stringify([]),
     },
   ];
 

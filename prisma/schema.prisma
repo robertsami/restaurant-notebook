@@ -108,7 +108,7 @@ model Restaurant {
   id            String   @id @default(cuid())
   name          String
   location      String?
-  tags          String[] @default([])
+  tagsJson      String?  @map("tags") // Store tags as JSON string
   averageRating Float?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -118,6 +118,21 @@ model Restaurant {
   creator     User?           @relation("CreatedByUser", fields: [createdBy], references: [id])
   lists       ListRestaurant[]
   notes       Note[]
+  tags        RestaurantTag[]
+}
+
+// Restaurant Tag model
+model RestaurantTag {
+  id           String     @id @default(cuid())
+  name         String
+  restaurantId String
+  isAiGenerated Boolean   @default(false)
+  createdAt    DateTime   @default(now())
+
+  // Relations
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, name])
 }
 
 // List Restaurant junction model
@@ -142,7 +157,7 @@ model Note {
   listId       String?
   rating       Int?
   content      String?
-  photos       String[] @default([])
+  photosJson   String?  @map("photos") // Store photos as JSON string
   visitDate    DateTime?
   isPublic     Boolean  @default(false)
   createdAt    DateTime @default(now())
@@ -151,6 +166,18 @@ model Note {
   // Relations
   restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos     NotePhoto[]
+}
+
+// Note Photo model
+model NotePhoto {
+  id        String   @id @default(cuid())
+  url       String
+  noteId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
 }
 
 // Comment model
