@@ -7,11 +7,15 @@ RUN apk add --no-cache make gcc g++ python3 git
 
 COPY package*.json ./
 
-# Install dependencies with rebuild of bcrypt
-RUN npm install
-RUN npm rebuild bcrypt --build-from-source
+# Remove bcrypt from package.json and use bcryptjs instead
+RUN npm uninstall bcrypt
+RUN npm install bcryptjs
 
 COPY . .
+
+# Update auth files to use bcryptjs instead of bcrypt
+RUN find /app -type f -name "*.ts" -exec sed -i 's/from "bcrypt"/from "bcryptjs"/g' {} \;
+RUN find /app -type f -name "*.ts" -exec sed -i "s/from 'bcrypt'/from 'bcryptjs'/g" {} \;
 
 RUN npx prisma generate
 
