@@ -4,9 +4,13 @@ FROM node:20-alpine AS base
 FROM base AS deps
 WORKDIR /app
 
+# Install dependencies required for bcrypt
+RUN apk add --no-cache make gcc g++ python3 git
+
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
 RUN npm ci
+RUN npm rebuild bcrypt --build-from-source
 
 # Rebuild the source code only when needed
 FROM base AS builder
