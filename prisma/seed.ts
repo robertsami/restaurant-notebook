@@ -34,20 +34,70 @@ async function main() {
   // Create sample restaurants
   const restaurants = [
     // Chicago
-    { name: 'Lou Malnati\'s Pizzeria', location: 'Chicago, IL' },
-    { name: 'Alinea', location: 'Chicago, IL' },
-    { name: 'Girl & The Goat', location: 'Chicago, IL' },
-    { name: 'Portillo\'s', location: 'Chicago, IL' },
+    { 
+      name: 'Lou Malnati\'s Pizzeria', 
+      location: 'Chicago, IL',
+      tags: ['pizza', 'deep dish', 'italian', 'casual', 'family-friendly'],
+      createdBy: alice.id
+    },
+    { 
+      name: 'Alinea', 
+      location: 'Chicago, IL',
+      tags: ['fine dining', 'molecular gastronomy', 'expensive', 'date night', 'tasting menu'],
+      createdBy: alice.id
+    },
+    { 
+      name: 'Girl & The Goat', 
+      location: 'Chicago, IL',
+      tags: ['american', 'small plates', 'trendy', 'upscale', 'creative'],
+      createdBy: alice.id
+    },
+    { 
+      name: 'Portillo\'s', 
+      location: 'Chicago, IL',
+      tags: ['hot dogs', 'italian beef', 'fast casual', 'affordable', 'chicago classic'],
+      createdBy: bob.id
+    },
     
     // New York
-    { name: 'Katz\'s Delicatessen', location: 'New York, NY' },
-    { name: 'Eleven Madison Park', location: 'New York, NY' },
-    { name: 'Gramercy Tavern', location: 'New York, NY' },
+    { 
+      name: 'Katz\'s Delicatessen', 
+      location: 'New York, NY',
+      tags: ['deli', 'pastrami', 'sandwiches', 'casual', 'iconic'],
+      createdBy: bob.id
+    },
+    { 
+      name: 'Eleven Madison Park', 
+      location: 'New York, NY',
+      tags: ['fine dining', 'plant-based', 'expensive', 'tasting menu', 'michelin star'],
+      createdBy: alice.id
+    },
+    { 
+      name: 'Gramercy Tavern', 
+      location: 'New York, NY',
+      tags: ['american', 'farm-to-table', 'upscale', 'romantic', 'seasonal'],
+      createdBy: bob.id
+    },
     
     // Los Angeles
-    { name: 'Bestia', location: 'Los Angeles, CA' },
-    { name: 'Nobu', location: 'Los Angeles, CA' },
-    { name: 'In-N-Out Burger', location: 'Los Angeles, CA' },
+    { 
+      name: 'Bestia', 
+      location: 'Los Angeles, CA',
+      tags: ['italian', 'trendy', 'pasta', 'date night', 'upscale'],
+      createdBy: alice.id
+    },
+    { 
+      name: 'Nobu', 
+      location: 'Los Angeles, CA',
+      tags: ['japanese', 'sushi', 'celebrity', 'expensive', 'upscale'],
+      createdBy: bob.id
+    },
+    { 
+      name: 'In-N-Out Burger', 
+      location: 'Los Angeles, CA',
+      tags: ['burgers', 'fast food', 'affordable', 'iconic', 'casual'],
+      createdBy: alice.id
+    },
   ];
 
   const createdRestaurants = [];
@@ -61,6 +111,8 @@ async function main() {
         id: restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
         name: restaurant.name,
         location: restaurant.location,
+        tags: restaurant.tags,
+        createdBy: restaurant.createdBy
       },
     });
     createdRestaurants.push(created);
@@ -135,22 +187,37 @@ async function main() {
       userId: alice.id,
       restaurantId: createdRestaurants.find(r => r.name === 'Lou Malnati\'s Pizzeria')!.id,
       rating: 5,
-      content: 'Best deep dish pizza in Chicago! The butter crust is amazing.',
+      content: 'Best deep dish pizza in Chicago! The butter crust is amazing. I loved the cheese pull and the chunky tomato sauce. The atmosphere was cozy and the service was friendly. Will definitely be back next time I\'m in Chicago.',
       isPublic: true,
+      visitDate: new Date('2023-10-15'),
+      photos: [],
     },
     {
       userId: alice.id,
       restaurantId: createdRestaurants.find(r => r.name === 'Alinea')!.id,
       rating: 5,
-      content: 'Mind-blowing experience. The edible balloon was so fun!',
+      content: 'Mind-blowing experience. The edible balloon was so fun! Every course was like a work of art. The service was impeccable and the wine pairings were perfect. Expensive but worth it for a special occasion.',
       isPublic: true,
+      visitDate: new Date('2023-11-20'),
+      photos: [],
     },
     {
       userId: bob.id,
       restaurantId: createdRestaurants.find(r => r.name === 'In-N-Out Burger')!.id,
       rating: 4,
-      content: 'Animal style is the way to go. Great fast food burger.',
+      content: 'Animal style is the way to go. Great fast food burger. The fries were a bit underwhelming but the burger was juicy and delicious. Love the secret menu options and the price can\'t be beat.',
       isPublic: true,
+      visitDate: new Date('2023-09-05'),
+      photos: [],
+    },
+    {
+      userId: bob.id,
+      restaurantId: createdRestaurants.find(r => r.name === 'Nobu')!.id,
+      rating: 3,
+      content: 'The food was good but not worth the hype or the price. The black cod with miso was the standout dish. Service was a bit pretentious and the atmosphere felt more about being seen than about the food.',
+      isPublic: false,
+      visitDate: new Date('2023-12-01'),
+      photos: [],
     },
   ];
 
@@ -158,6 +225,35 @@ async function main() {
     await prisma.note.create({
       data: note,
     });
+  }
+  
+  // Update restaurant average ratings
+  for (const restaurant of createdRestaurants) {
+    const restaurantNotes = await prisma.note.findMany({
+      where: {
+        restaurantId: restaurant.id,
+        rating: {
+          not: null,
+        },
+      },
+      select: {
+        rating: true,
+      },
+    });
+
+    if (restaurantNotes.length > 0) {
+      const sum = restaurantNotes.reduce((acc, note) => acc + (note.rating || 0), 0);
+      const average = sum / restaurantNotes.length;
+
+      await prisma.restaurant.update({
+        where: {
+          id: restaurant.id,
+        },
+        data: {
+          averageRating: average,
+        },
+      });
+    }
   }
 
   console.log(`Created ${notes.length} notes`);
