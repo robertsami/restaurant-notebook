@@ -8,6 +8,8 @@ generator client {
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
+  // SQLite doesn't support arrays of primitive types
+  // We use JSON strings instead and parse them in the API
 }
 
 // User model
