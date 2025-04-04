@@ -2,22 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install only the minimal dependencies required
-RUN apk add --no-cache python3 git
+# Copy only package files
+COPY package.json ./
 
-# Copy only package files first for better layer caching
-COPY package*.json ./
-
-# Install dependencies with production flag to save space
-# Then clean npm cache to reduce image size
-RUN npm install --production=false && \
+# Install only the essential dependencies
+RUN npm install --no-optional --no-audit --progress=false && \
     npm cache clean --force
 
-# Copy application code
-COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate
+# We'll mount the source code as a volume
+# This is a minimal Dockerfile to address disk space issues
 
 EXPOSE 59243
 

@@ -2,15 +2,12 @@ version: '3.8'
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    image: node:20-alpine
+    working_dir: /app
     ports:
       - "59243:59243"
     volumes:
-      - ./:/app:delegated
-      - node_modules:/app/node_modules
-      - prisma-data:/app/prisma
+      - ./:/app
     environment:
       - NODE_ENV=development
       - DATABASE_URL=file:/app/prisma/dev.db
@@ -29,9 +26,5 @@ services:
       - NEXT_PUBLIC_PUSHER_CLUSTER=eu
       - NEXT_PUBLIC_SENTRY_DSN=https://mock-sentry-dsn@o123456.ingest.sentry.io/123456
       - NEXT_PUBLIC_LOGROCKET_APP_ID=restaurant-notebook/dev
-    command: sh -c "npx prisma migrate dev --name init && npm run dev"
+    command: sh -c "npm install && npx prisma generate && npm run dev"
     restart: unless-stopped
-
-volumes:
-  node_modules:
-  prisma-data:
