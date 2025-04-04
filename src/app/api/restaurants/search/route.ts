@@ -38,12 +38,25 @@ export async function GET(req: NextRequest) {
               mode: 'insensitive',
             },
           },
+          // Search in tags via the RestaurantTag model
           {
             tags: {
-              has: query.toLowerCase(),
+              some: {
+                name: {
+                  contains: query.toLowerCase(),
+                  mode: 'insensitive',
+                },
+              },
             },
           },
         ],
+      },
+      include: {
+        tags: {
+          select: {
+            name: true,
+          },
+        },
       },
       take: 10,
       orderBy: {
@@ -51,7 +64,31 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(restaurants);
+    // Process restaurants to handle JSON fields
+    const processedRestaurants = restaurants.map(restaurant => {
+      // Parse tagsJson if it exists
+      let tags: string[] = [];
+      if (restaurant.tagsJson) {
+        try {
+          tags = JSON.parse(restaurant.tagsJson);
+        } catch (e) {
+          console.error('Error parsing tagsJson:', e);
+          // Fallback to tags from the relation
+          tags = restaurant.tags.map(tag => tag.name);
+        }
+      } else {
+        // Use tags from the relation if tagsJson doesn't exist
+        tags = restaurant.tags.map(tag => tag.name);
+      }
+
+      // Return the restaurant with parsed tags
+      return {
+        ...restaurant,
+        tags,
+      };
+    });
+
+    return NextResponse.json(processedRestaurants);
   } catch (error) {
     console.error('Error searching restaurants:', error);
     Sentry.captureException(error);

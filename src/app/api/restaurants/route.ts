@@ -45,19 +45,51 @@ export async function POST(req: NextRequest) {
             : {},
         ],
       },
+      include: {
+        tags: true,
+      },
     });
 
     if (existingRestaurant) {
-      return NextResponse.json(existingRestaurant);
+      // Parse tags from JSON
+      let parsedTags: string[] = [];
+      if (existingRestaurant.tagsJson) {
+        try {
+          parsedTags = JSON.parse(existingRestaurant.tagsJson);
+        } catch (e) {
+          console.error('Error parsing tagsJson:', e);
+          // Fallback to tags from the relation
+          parsedTags = existingRestaurant.tags.map(tag => tag.name);
+        }
+      } else {
+        // Use tags from the relation if tagsJson doesn't exist
+        parsedTags = existingRestaurant.tags.map(tag => tag.name);
+      }
+
+      return NextResponse.json({
+        ...existingRestaurant,
+        tags: parsedTags,
+      });
     }
 
-    // Create a new restaurant
+    // Create a new restaurant with JSON tags
+    const tagsArray = tags || [];
     const newRestaurant = await prisma.restaurant.create({
       data: {
         name,
         location,
-        tags: tags || [],
+        tagsJson: JSON.stringify(tagsArray),
         createdBy: session.user.id,
+        // Create tag relations
+        tags: {
+          create: tagsArray.map(tag => ({
+            name: tag,
+            isAiGenerated: false,
+          })),
+        },
+      },
+      include: {
+        tags: true,
       },
     });
 
@@ -70,7 +102,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(newRestaurant);
+    // Return the restaurant with tags as an array
+    return NextResponse.json({
+      ...newRestaurant,
+      tags: tagsArray,
+    });
   } catch (error) {
     console.error('Error creating restaurant:', error);
     Sentry.captureException(error);

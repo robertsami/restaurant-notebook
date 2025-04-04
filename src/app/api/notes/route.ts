@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create the note
+    // Create the note with JSON fields
     const note = await prisma.note.create({
       data: {
         restaurantId,
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
         content,
         visitDate: visitDate ? new Date(visitDate) : null,
         isPublic,
-        photos: photos || [],
+        photosJson: JSON.stringify(photos || []),
       },
     });
 
@@ -125,7 +125,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(note);
+    // Return the note with photos parsed from JSON
+    return NextResponse.json({
+      ...note,
+      photos: photos || [],
+    });
   } catch (error) {
     console.error('Error creating note:', error);
     Sentry.captureException(error);

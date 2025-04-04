@@ -81,9 +81,40 @@ export async function GET(
       );
     }
 
+    // Parse JSON fields and transform the data
+    let tags: string[] = [];
+    if (restaurant.tagsJson) {
+      try {
+        tags = JSON.parse(restaurant.tagsJson);
+      } catch (e) {
+        console.error('Error parsing restaurant tagsJson:', e);
+      }
+    }
+
+    // Process notes to handle JSON fields
+    const processedNotes = restaurant.notes.map(note => {
+      // Parse photosJson if it exists
+      let photos: string[] = [];
+      if (note.photosJson) {
+        try {
+          photos = JSON.parse(note.photosJson);
+        } catch (e) {
+          console.error('Error parsing photosJson:', e);
+        }
+      }
+
+      // Return the note with parsed photos
+      return {
+        ...note,
+        photos,
+      };
+    });
+
     // Transform the data to flatten the structure
     const transformedRestaurant = {
       ...restaurant,
+      tags,
+      notes: processedNotes,
       lists: restaurant.lists.map((item) => ({
         ...item.list,
       })),
