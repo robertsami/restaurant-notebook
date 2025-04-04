@@ -2,16 +2,21 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies required for building packages
-RUN apk add --no-cache make gcc g++ python3 git
+# Install only the minimal dependencies required
+RUN apk add --no-cache python3 git
 
+# Copy only package files first for better layer caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies with production flag to save space
+# Then clean npm cache to reduce image size
+RUN npm install --production=false && \
+    npm cache clean --force
 
+# Copy application code
 COPY . .
 
+# Generate Prisma client
 RUN npx prisma generate
 
 EXPOSE 59243

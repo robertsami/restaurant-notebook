@@ -4,12 +4,12 @@ FROM node:20-alpine AS base
 FROM base AS deps
 WORKDIR /app
 
-# Install dependencies required for building packages
-RUN apk add --no-cache make gcc g++ python3 git
+# Install minimal dependencies required for building packages
+RUN apk add --no-cache python3 git
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm ci && npm cache clean --force
 
 # Rebuild the source code only when needed
 FROM base AS builder
