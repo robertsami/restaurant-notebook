@@ -1,0 +1,217 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  ownedLists    RestaurantList[] @relation("ListOwner")
+  collaborations ListCollaborator[]
+  notes         Note[]
+  comments      Comment[]
+  notifications Notification[]
+  activities    Activity[]
+}
+
+// NextAuth models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Restaurant List model
+model RestaurantList {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  visibility  String   @default("private") // private, friends, public
+  coverImage  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  ownerId     String
+
+  // Relations
+  owner         User               @relation("ListOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  collaborators ListCollaborator[]
+  restaurants   ListRestaurant[]
+  comments      Comment[]
+}
+
+// List Collaborator model
+model ListCollaborator {
+  id        String   @id @default(cuid())
+  listId    String
+  userId    String
+  role      String   @default("viewer") // editor, viewer
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  list      RestaurantList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, userId])
+}
+
+// Restaurant model
+model Restaurant {
+  id            String   @id @default(cuid())
+  name          String
+  location      String?
+  averageRating Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  tags          RestaurantTag[]
+  lists         ListRestaurant[]
+  notes         Note[]
+}
+
+// Restaurant Tag model
+model RestaurantTag {
+  id           String     @id @default(cuid())
+  name         String
+  restaurantId String
+  isAiGenerated Boolean   @default(false)
+  createdAt    DateTime   @default(now())
+
+  // Relations
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, name])
+}
+
+// List Restaurant junction model
+model ListRestaurant {
+  id           String   @id @default(cuid())
+  listId       String
+  restaurantId String
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  list         RestaurantList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, restaurantId])
+}
+
+// Note model
+model Note {
+  id           String   @id @default(cuid())
+  rating       Int?
+  content      String?
+  isPublic     Boolean  @default(false)
+  visitDate    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String
+  restaurantId String
+
+  // Relations
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  photos       NotePhoto[]
+}
+
+// Note Photo model
+model NotePhoto {
+  id        String   @id @default(cuid())
+  url       String
+  noteId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+}
+
+// Comment model
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  listId    String
+  restaurantId String?
+
+  // Relations
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  list      RestaurantList @relation(fields: [listId], references: [id], onDelete: Cascade)
+}
+
+// Notification model
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // invite, comment, like, reply
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    String
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Activity model
+model Activity {
+  id        String   @id @default(cuid())
+  type      String   // add_restaurant, write_note, etc.
+  content   String
+  createdAt DateTime @default(now())
+  userId    String
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

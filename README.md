@@ -1,36 +1,139 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Restaurant Notebook
+
+Restaurant Notebook is a full-stack web application that allows users to track restaurants they want to visit, log their experiences, write notes, collaborate on restaurant lists with friends, and explore trends over time. The app also includes AI-powered features for note summarization and restaurant suggestions.
+
+## Features
+
+- **Restaurant Lists**: Create and manage lists of restaurants to visit
+- **Notes & Reviews**: Log personal notes, ratings, and photos for each restaurant
+- **Collaboration**: Share lists with friends and collaborate in real-time
+- **AI Features**: Summarize notes, auto-tag restaurants, and get personalized suggestions
+- **Analytics**: View personal dining trends and statistics
+
+## Tech Stack
+
+- **Frontend**: Next.js (App Router), Tailwind CSS
+- **State Management**: Zustand
+- **Authentication**: NextAuth.js
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL via Prisma ORM
+- **File Storage**: Firebase Storage
+- **Real-time**: Pusher
+- **AI Integration**: OpenAI GPT-4 API
+- **Analytics**: Recharts
+- **Observability**: Sentry + LogRocket
+- **Testing**: Vitest + Playwright
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Docker (optional, for containerized development)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/restaurant-notebook.git
+   cd restaurant-notebook
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Edit `.env.local` with your configuration values.
+
+4. Generate Prisma client and push schema to database:
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+5. Seed the database with sample data:
+   ```bash
+   npm run seed
+   ```
+
+6. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+7. Open [http://localhost:53243](http://localhost:53243) in your browser.
+
+### Using Docker
+
+You can also use Docker for development:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker-compose up
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Testing
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Unit Tests
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run test
+```
 
-## Learn More
+### End-to-End Tests
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run test:e2e
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Build for Production
 
-## Deploy on Vercel
+```bash
+npm run build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Using Docker for Production
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+docker build -t restaurant-notebook .
+docker run -p 3000:3000 restaurant-notebook
+```
+
+## Project Structure
+
+```
+restaurant-notebook/
+├── src/
+│   ├── app/                 # Next.js App Router
+│   │   ├── api/             # API Routes
+│   │   ├── (authenticated)/ # Protected routes
+│   │   └── auth/            # Authentication pages
+│   ├── components/          # React components
+│   ├── lib/                 # Utility libraries
+│   ├── providers/           # React context providers
+│   ├── store/               # Zustand state management
+│   └── types/               # TypeScript type definitions
+├── prisma/                  # Prisma schema and migrations
+├── public/                  # Static assets
+├── e2e/                     # End-to-end tests
+└── tests/                   # Unit and integration tests
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgements
+
+- [Next.js](https://nextjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Prisma](https://www.prisma.io/)
+- [NextAuth.js](https://next-auth.js.org/)
+- [OpenAI](https://openai.com/)
