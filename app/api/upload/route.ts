@@ -1,15 +1,12 @@
 import { auth } from "@/lib/auth"
+import { ensureAuthApi } from "@/lib/utils/session"
 import { NextResponse } from "next/server"
 import { v4 as uuidv4 } from "uuid"
 import { put } from "@vercel/blob"
 
 export async function POST(req: Request) {
   try {
-    const session = await auth()
-
-    if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
+    const session = ensureAuthApi(await auth())
 
     const formData = await req.formData()
     const file = formData.get("file") as File

@@ -6,3 +6,5 @@ attached_assets/
 .env.development
 .env.test
 .DS_Store
+.next/
+tsconfig.tsbuildinfo

@@ -6,11 +6,11 @@ type RestaurantHeaderProps = {
     id: string
     name: string
     address: string
-    phone?: string
-    website?: string
+    phone?: string | null
+    website?: string | null
     photos: string[]
-    priceLevel?: number
-    rating?: number
+    priceLevel?: number | null
+    rating?: number | null
   }
 }
 

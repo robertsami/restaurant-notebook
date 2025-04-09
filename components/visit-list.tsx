@@ -9,13 +9,13 @@ type VisitListProps = {
     id: string
     date: Date
     notes: string
-    rating?: number
+    rating?: number | null
     photos: string[]
     participants: {
       user: {
         id: string
-        name: string
-        image: string
+        name: string | null
+        image: string | null
       }
     }[]
   }[]
@@ -48,7 +48,7 @@ export function VisitList({ visits }: VisitListProps) {
               <div className="flex -space-x-2">
                 {visit.participants.map((participant) => (
                   <Avatar key={participant.user.id} className="h-8 w-8 border-2 border-background">
-                    <AvatarImage src={participant.user.image} alt={participant.user.name || ""} />
+                    <AvatarImage src={participant.user.image || undefined} alt={participant.user.name || ""} />
                     <AvatarFallback>{participant.user.name?.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
                 ))}

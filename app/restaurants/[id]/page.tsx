@@ -4,7 +4,6 @@ import { db } from "@/lib/db"
 import { RestaurantHeader } from "@/components/restaurant-header"
 import { VisitList } from "@/components/visit-list"
 import { AddVisitButton } from "@/components/add-visit-button"
-import { nullToUndefined } from "@/lib/utils/null-to-undefined"
 import { ensureAuth } from "@/lib/utils/session"
 
 export default async function RestaurantPage({ params }: { params: { id: string } }) {
@@ -45,17 +44,15 @@ export default async function RestaurantPage({ params }: { params: { id: string 
     notFound()
   }
 
-  const processedRestaurant = nullToUndefined(restaurant)
-
   return (
     <div>
-      <RestaurantHeader restaurant={processedRestaurant} />
+      <RestaurantHeader restaurant={restaurant} />
 
       <div className="flex justify-end mb-6">
-        <AddVisitButton restaurantId={processedRestaurant.id} userId={session.user.id} />
+        <AddVisitButton restaurantId={restaurant.id} userId={session.user.id} />
       </div>
 
-      <VisitList visits={processedRestaurant.visits} />
+      <VisitList visits={restaurant.visits} />
     </div>
   )
 }

@@ -4,7 +4,6 @@ import { db } from "@/lib/db"
 import { RestaurantList } from "@/components/restaurant-list"
 import { ListHeader } from "@/components/list-header"
 import { AddRestaurantButton } from "@/components/add-restaurant-button"
-import { nullToUndefined } from "@/lib/utils/null-to-undefined"
 import { ensureAuth } from "@/lib/utils/session"
 
 export default async function ListPage({ params }: { params: { id: string } }) {
@@ -40,17 +39,15 @@ export default async function ListPage({ params }: { params: { id: string } }) {
     notFound()
   }
 
-  const processedList = nullToUndefined(list)
-
   return (
     <div>
-      <ListHeader list={processedList} />
+      <ListHeader list={list} />
 
       <div className="flex justify-end mb-6">
-        <AddRestaurantButton listId={processedList.id} />
+        <AddRestaurantButton listId={list.id} />
       </div>
 
-      <RestaurantList listId={processedList.id} restaurants={processedList.restaurants} />
+      <RestaurantList listId={list.id} restaurants={list.restaurants} />
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth"
+import { ensureAuthApi } from "@/lib/utils/session"
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { z } from "zod"
@@ -17,11 +18,7 @@ const addRestaurantSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const session = await auth()
-
-    if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
+    const session = ensureAuthApi(await auth())
 
     const json = await req.json()
     const body = addRestaurantSchema.parse(json)

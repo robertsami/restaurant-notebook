@@ -22,12 +22,12 @@ type ListHeaderProps = {
     id: string
     name: string
     description: string
-    coverImage?: string
+    coverImage?: string | null
     owners: {
       user: {
         id: string
-        name: string
-        image: string
+        name: string | null
+        image: string | null
       }
     }[]
   }
@@ -89,7 +89,7 @@ export function ListHeader({ list }: ListHeaderProps) {
               <div className="flex -space-x-2">
                 {list.owners.map((owner) => (
                   <Avatar key={owner.user.id} className="h-8 w-8 border-2 border-background">
-                    <AvatarImage src={owner.user.image} alt={owner.user.name || ""} />
+                    <AvatarImage src={owner.user.image || undefined} alt={owner.user.name || ""} />
                     <AvatarFallback>{owner.user.name?.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
                 ))}

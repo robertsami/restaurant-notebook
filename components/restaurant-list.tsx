@@ -20,8 +20,8 @@ type RestaurantListProps = {
       name: string
       address: string
       photos: string[]
-      rating?: number
-      priceLevel?: number
+      rating?: number | null
+      priceLevel?: number | null
     }
   }[]
 }

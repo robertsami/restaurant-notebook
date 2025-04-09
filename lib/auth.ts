@@ -22,7 +22,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token && session.user) {
         session.user.id = token.id as string
         session.user.name = token.name || null
-        session.user.email = token.email || null
+        
+        // Ensure email is properly typed
+        if (typeof token.email === 'string') {
+          session.user.email = token.email;
+        } else {
+          session.user.email = '';
+        }
+        
         session.user.image = token.picture || null
       }
 

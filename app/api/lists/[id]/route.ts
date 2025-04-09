@@ -1,15 +1,12 @@
 import { auth } from "@/lib/auth"
+import { ensureAuthApi } from "@/lib/utils/session"
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { z } from "zod"
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-    const session = await auth()
-
-    if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
+    const session = ensureAuthApi(await auth())
 
     // Check if user is an owner of the list
     const list = await db.list.findFirst({
@@ -49,11 +46,7 @@ const updateListSchema = z.object({
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
-    const session = await auth()
-
-    if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
+    const session = ensureAuthApi(await auth())
 
     const json = await req.json()
     const body = updateListSchema.parse(json)

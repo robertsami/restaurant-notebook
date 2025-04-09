@@ -1,14 +1,11 @@
 import { auth } from "@/lib/auth"
+import { ensureAuthApi } from "@/lib/utils/session"
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 
 export async function GET(req: Request) {
   try {
-    const session = await auth()
-
-    if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
+    const session = ensureAuthApi(await auth())
 
     const { searchParams } = new URL(req.url)
     const query = searchParams.get("q")

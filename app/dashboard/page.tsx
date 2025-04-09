@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
 import Link from "next/link"
 import { EmptyState } from "@/components/empty-state"
-import { nullToUndefined } from "@/lib/utils/null-to-undefined"
 import { ensureAuth } from "@/lib/utils/session"
 
 export default async function Dashboard() {
@@ -62,7 +61,7 @@ export default async function Dashboard() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {lists.map((list) => (
-            <ListCard key={list.id} list={nullToUndefined(list)} />
+            <ListCard key={list.id} list={list} />
           ))}
         </div>
       )}
