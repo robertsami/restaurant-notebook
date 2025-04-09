@@ -1,14 +1,9 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
 import { CreateListForm } from "@/components/create-list-form"
+import { ensureAuth } from "@/lib/utils/session"
 
 export default async function NewList() {
-  const session = await getServerSession(authOptions)
-
-  if (!session) {
-    redirect("/api/auth/signin")
-  }
+  const session = ensureAuth(await auth())
 
   return (
     <div className="max-w-2xl mx-auto">

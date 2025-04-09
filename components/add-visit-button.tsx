@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -24,7 +25,7 @@ import { UserSearch } from "@/components/user-search"
 
 type AddVisitButtonProps = {
   restaurantId: string
-  userId: string
+  userId: string | undefined
 }
 
 export function AddVisitButton({ restaurantId, userId }: AddVisitButtonProps) {
@@ -34,7 +35,7 @@ export function AddVisitButton({ restaurantId, userId }: AddVisitButtonProps) {
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [notes, setNotes] = useState("")
   const [photos, setPhotos] = useState<string[]>([])
-  const [participants, setParticipants] = useState<string[]>([userId])
+  const [participants, setParticipants] = useState<string[]>(userId ? [userId] : [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -78,7 +79,7 @@ export function AddVisitButton({ restaurantId, userId }: AddVisitButtonProps) {
       setDate(new Date())
       setNotes("")
       setPhotos([])
-      setParticipants([userId])
+      setParticipants(userId ? [userId] : [])
       router.refresh()
     } catch (error) {
       console.error(error)

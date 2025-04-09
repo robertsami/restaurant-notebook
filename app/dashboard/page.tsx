@@ -1,19 +1,15 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { ListCard } from "@/components/list-card"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
 import Link from "next/link"
 import { EmptyState } from "@/components/empty-state"
+import { nullToUndefined } from "@/lib/utils/null-to-undefined"
+import { ensureAuth } from "@/lib/utils/session"
 
 export default async function Dashboard() {
-  const session = await getServerSession(authOptions)
-
-  if (!session) {
-    redirect("/api/auth/signin")
-  }
+  const session = ensureAuth(await auth())
 
   const lists = await db.list.findMany({
     where: {
@@ -66,7 +62,7 @@ export default async function Dashboard() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {lists.map((list) => (
-            <ListCard key={list.id} list={list} />
+            <ListCard key={list.id} list={nullToUndefined(list)} />
           ))}
         </div>
       )}

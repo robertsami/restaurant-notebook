@@ -1,8 +1,8 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { z } from "zod"
+import { ensureAuthApi } from "@/lib/utils/session"
 
 const reorderSchema = z.object({
   items: z.array(
@@ -15,11 +15,7 @@ const reorderSchema = z.object({
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
+    const session = ensureAuthApi(await auth())
 
     // Check if user is an owner of the list
     const list = await db.list.findFirst({

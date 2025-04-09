@@ -21,7 +21,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-export function CreateListForm({ userId }: { userId: string }) {
+export function CreateListForm({ userId }: { userId: string | undefined }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 

@@ -18,6 +18,6 @@ export async function getPlaceDetails(placeId: string) {
   return data.result
 }
 
-export async function getPlacePhoto(photoReference: string, maxWidth = 400) {
+export function getPlacePhoto(photoReference: string, maxWidth = 400): string {
   return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photoreference=${photoReference}&key=${process.env.GOOGLE_PLACES_API_KEY}`
 }

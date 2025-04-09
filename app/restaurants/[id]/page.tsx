@@ -1,17 +1,14 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect, notFound } from "next/navigation"
+import { auth } from "@/lib/auth"
+import { notFound } from "next/navigation"
 import { db } from "@/lib/db"
 import { RestaurantHeader } from "@/components/restaurant-header"
 import { VisitList } from "@/components/visit-list"
 import { AddVisitButton } from "@/components/add-visit-button"
+import { nullToUndefined } from "@/lib/utils/null-to-undefined"
+import { ensureAuth } from "@/lib/utils/session"
 
 export default async function RestaurantPage({ params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions)
-
-  if (!session) {
-    redirect("/api/auth/signin")
-  }
+  const session = ensureAuth(await auth())
 
   const restaurant = await db.restaurant.findUnique({
     where: {
@@ -48,15 +45,17 @@ export default async function RestaurantPage({ params }: { params: { id: string 
     notFound()
   }
 
+  const processedRestaurant = nullToUndefined(restaurant)
+
   return (
     <div>
-      <RestaurantHeader restaurant={restaurant} />
+      <RestaurantHeader restaurant={processedRestaurant} />
 
       <div className="flex justify-end mb-6">
-        <AddVisitButton restaurantId={restaurant.id} userId={session.user.id} />
+        <AddVisitButton restaurantId={processedRestaurant.id} userId={session.user.id} />
       </div>
 
-      <VisitList visits={restaurant.visits} />
+      <VisitList visits={processedRestaurant.visits} />
     </div>
   )
 }
