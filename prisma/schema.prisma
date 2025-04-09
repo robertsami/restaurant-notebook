@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String?     @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  lists         ListOwner[]
+  visits        VisitParticipant[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model List {
+  id          String         @id @default(cuid())
+  name        String
+  description String         @default("")
+  coverImage  String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  owners      ListOwner[]
+  restaurants ListRestaurant[]
+}
+
+model ListOwner {
+  id     String @id @default(cuid())
+  listId String
+  userId String
+  list   List   @relation(fields: [listId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, userId])
+}
+
+model Restaurant {
+  id         String           @id @default(cuid())
+  placeId    String           @unique
+  name       String
+  address    String
+  phone      String?
+  website    String?
+  photos     String[]
+  priceLevel Int?
+  rating     Float?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  lists      ListRestaurant[]
+  visits     Visit[]
+}
+
+model ListRestaurant {
+  id           String     @id @default(cuid())
+  listId       String
+  restaurantId String
+  order        Int
+  list         List       @relation(fields: [listId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, restaurantId])
+}
+
+model Visit {
+  id           String              @id @default(cuid())
+  restaurantId String
+  date         DateTime
+  notes        String              @default("")
+  rating       Int?
+  photos       String[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  restaurant   Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  participants VisitParticipant[]
+}
+
+model VisitParticipant {
+  id      String @id @default(cuid())
+  visitId String
+  userId  String
+  visit   Visit  @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([visitId, userId])
+}
